@@ -15,11 +15,11 @@ const Chat = () => {
   return (
     <div className="chat">
       <div className="chatInfo">
+        <span style={{ color: "white", fontSize: "20px" }}>
+          {data.user?.displayName}
+        </span>
         {data.user?.displayName && (
           <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel htmlFor="select" sx={{ color: "white" }}>
-              Language
-            </InputLabel>
             <Select
               labelId="demo-simple-select-standard-label"
               id="demo-simple-select-standard"
@@ -41,12 +41,6 @@ const Chat = () => {
             </Select>
           </FormControl>
         )}
-        <span>{data.user?.displayName}</span>
-        <div className="chatIcons">
-          <img src={Cam} alt="" />
-          <img src={Add} alt="" />
-          <img src={More} alt="" />
-        </div>
       </div>
       <Messages />
       <Input cc={cc} />

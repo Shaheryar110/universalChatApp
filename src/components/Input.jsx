@@ -22,72 +22,74 @@ const Input = ({ cc }) => {
   const { data } = useContext(ChatContext);
 
   const handleSend = async () => {
-    const response = await fetch("http://localhost:5000/api/translate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // Add other headers if required
-      },
-      body: JSON.stringify({
-        lng: cc,
-        text: text,
-      }),
-    });
-    let content = await response.json();
-    // console.log(await response.json(), "response");
-    if (response.ok) {
-      if (img) {
-        const storageRef = ref(storage, uuid());
+    if (text.length > 0) {
+      const response = await fetch("http://localhost:5000/api/translate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Add other headers if required
+        },
+        body: JSON.stringify({
+          lng: cc,
+          text: text,
+        }),
+      });
+      let content = await response.json();
+      // console.log(await response.json(), "response");
+      if (response.ok) {
+        if (img) {
+          const storageRef = ref(storage, uuid());
 
-        const uploadTask = uploadBytesResumable(storageRef, img);
+          const uploadTask = uploadBytesResumable(storageRef, img);
 
-        uploadTask.on(
-          (error) => {
-            //TODO:Handle Error
-          },
-          () => {
-            getDownloadURL(uploadTask.snapshot.ref).then(
-              async (downloadURL) => {
-                await updateDoc(doc(db, "chats", data.chatId), {
-                  messages: arrayUnion({
-                    id: uuid(),
-                    content,
-                    senderId: currentUser.uid,
-                    date: Timestamp.now(),
-                    img: downloadURL,
-                  }),
-                });
-              }
-            );
-          }
-        );
-      } else {
-        await updateDoc(doc(db, "chats", data.chatId), {
-          messages: arrayUnion({
-            id: uuid(),
+          uploadTask.on(
+            (error) => {
+              //TODO:Handle Error
+            },
+            () => {
+              getDownloadURL(uploadTask.snapshot.ref).then(
+                async (downloadURL) => {
+                  await updateDoc(doc(db, "chats", data.chatId), {
+                    messages: arrayUnion({
+                      id: uuid(),
+                      content,
+                      senderId: currentUser.uid,
+                      date: Timestamp.now(),
+                      img: downloadURL,
+                    }),
+                  });
+                }
+              );
+            }
+          );
+        } else {
+          await updateDoc(doc(db, "chats", data.chatId), {
+            messages: arrayUnion({
+              id: uuid(),
+              content,
+              senderId: currentUser.uid,
+              date: Timestamp.now(),
+            }),
+          });
+        }
+
+        await updateDoc(doc(db, "userChats", currentUser.uid), {
+          [data.chatId + ".lastMessage"]: {
             content,
-            senderId: currentUser.uid,
-            date: Timestamp.now(),
-          }),
+          },
+          [data.chatId + ".date"]: serverTimestamp(),
         });
+
+        await updateDoc(doc(db, "userChats", data.user.uid), {
+          [data.chatId + ".lastMessage"]: {
+            content,
+          },
+          [data.chatId + ".date"]: serverTimestamp(),
+        });
+
+        setText("");
+        setImg(null);
       }
-
-      await updateDoc(doc(db, "userChats", currentUser.uid), {
-        [data.chatId + ".lastMessage"]: {
-          content,
-        },
-        [data.chatId + ".date"]: serverTimestamp(),
-      });
-
-      await updateDoc(doc(db, "userChats", data.user.uid), {
-        [data.chatId + ".lastMessage"]: {
-          content,
-        },
-        [data.chatId + ".date"]: serverTimestamp(),
-      });
-
-      setText("");
-      setImg(null);
     }
   };
   return (
@@ -107,9 +109,11 @@ const Input = ({ cc }) => {
           onChange={(e) => setImg(e.target.files[0])}
         />
         <label htmlFor="file">
-          <img src={Img} alt="" />
+          <img style={{ width: "40px", height: "auto" }} src={Img} alt="" />
         </label>
-        <button onClick={handleSend}>Send</button>
+        <button style={{ borderRadius: "5px" }} onClick={handleSend}>
+          Send
+        </button>
       </div>
     </div>
   );
