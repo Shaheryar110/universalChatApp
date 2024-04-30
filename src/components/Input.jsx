@@ -13,30 +13,52 @@ import {
 import { db, storage } from "../firebase";
 import { v4 as uuid } from "uuid";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const Input = ({ cc }) => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const { currentUser } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
 
   const handleSend = async () => {
     if (text.length > 0) {
-      const response = await fetch("http://localhost:5000/api/translate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // Add other headers if required
-        },
-        body: JSON.stringify({
-          lng: cc,
+      const options = {
+        method: "GET",
+        url: "https://nlp-translation.p.rapidapi.com/v1/translate",
+        params: {
           text: text,
-        }),
-      });
-      let content = await response.json();
+          to: cc,
+          from: "en",
+        },
+        headers: {
+          "X-RapidAPI-Key":
+            "bb0665451amsh975e1775ed50fe0p16feeajsnb7a25ae97850",
+          "X-RapidAPI-Host": "nlp-translation.p.rapidapi.com",
+        },
+      };
+      setLoading(true);
+      // const response = await fetch("https://tx-cc.com:3001/api/translate", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     // Add other headers if required
+      //   },
+      //   body: JSON.stringify({
+      //     lng: cc,
+      //     text: text,
+      //   }),
+      // });
+      const response = await axios.request(options);
+
+      let content = response.data.translated_text[cc];
+      // console.log(response.data.translated_text[cc], "content outside", cc);
       // console.log(await response.json(), "response");
-      if (response.ok) {
+      if (content) {
+        console.log(content, "content");
         if (img) {
           const storageRef = ref(storage, uuid());
 
@@ -89,7 +111,36 @@ const Input = ({ cc }) => {
 
         setText("");
         setImg(null);
+        setLoading(false);
+        toast.success("Message Sent Successfully");
       }
+    }
+    if (!text.length > 0 && img) {
+      setLoading(true);
+      const storageRef = ref(storage, uuid());
+
+      const uploadTask = uploadBytesResumable(storageRef, img);
+
+      uploadTask.on(
+        (error) => {
+          //TODO:Handle Error
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+            await updateDoc(doc(db, "chats", data.chatId), {
+              messages: arrayUnion({
+                id: uuid(),
+                content: "",
+                senderId: currentUser.uid,
+                date: Timestamp.now(),
+                img: downloadURL,
+              }),
+            });
+          });
+        }
+      );
+      setLoading(false);
+      toast.success("Message Sent Successfully");
     }
   };
   return (
@@ -112,7 +163,7 @@ const Input = ({ cc }) => {
           <img style={{ width: "40px", height: "auto" }} src={Img} alt="" />
         </label>
         <button style={{ borderRadius: "5px" }} onClick={handleSend}>
-          Send
+          {loading ? "Wait.." : "Send"}
         </button>
       </div>
     </div>

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [err, setErr] = useState(false);
@@ -13,7 +14,13 @@ const Login = () => {
     const password = e.target[1].value;
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          toast.success("Login SuccessFull");
+        })
+        .catch((err) => {
+          toast.err("Login Error Try Again");
+        });
       navigate("/");
     } catch (err) {
       setErr(true);
@@ -22,7 +29,7 @@ const Login = () => {
   return (
     <div className="formContainer">
       <div className="formWrapper">
-        <span className="logo">Universal Chat App</span>
+        <span className="logo">Chat Fusion</span>
         <span className="title">Login</span>
         <form onSubmit={handleSubmit}>
           <input type="email" placeholder="email" />

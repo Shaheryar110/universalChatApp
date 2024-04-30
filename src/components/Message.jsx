@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { ChatContext } from "../context/ChatContext";
+import { FaRegThumbsDown } from "react-icons/fa";
+import { FaRegThumbsUp } from "react-icons/fa";
 
 const Message = ({ message }) => {
   const { currentUser } = useContext(AuthContext);
@@ -31,6 +33,20 @@ const Message = ({ message }) => {
       <div className="messageContent">
         {!message.img && <p>{message.content}</p>}
         {message.img && <img src={message.img} alt="" />}
+        {/* <div
+          style={{
+            dislay: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent:
+              message.senderId === currentUser.uid ? "start" : "end",
+            gap: "10px",
+            marginTop: "14px",
+          }}
+        >
+          <FaRegThumbsUp style={{ color: "white", marginRight: "10px" }} />
+          <FaRegThumbsDown style={{ color: "white" }} />
+        </div> */}
       </div>
     </div>
   );
