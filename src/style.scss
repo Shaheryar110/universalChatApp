@@ -378,3 +378,7 @@
   border: 1px solid white !important;
   padding: 0px 15px !important;
 }
+input:-webkit-autofill {
+  /* Set a specific background color */
+  -webkit-box-shadow: 0 0 0 30px #f5f5f5 inset !important;
+}

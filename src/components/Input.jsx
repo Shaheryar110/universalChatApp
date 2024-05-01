@@ -15,6 +15,7 @@ import { v4 as uuid } from "uuid";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import toast from "react-hot-toast";
 import axios from "axios";
+import MoodIcon from "@mui/icons-material/Mood";
 
 const Input = ({ cc }) => {
   const [text, setText] = useState("");
@@ -144,29 +145,42 @@ const Input = ({ cc }) => {
     }
   };
   return (
-    <div className="input">
-      <input
-        type="text"
-        placeholder="Type something..."
-        onChange={(e) => setText(e.target.value)}
-        value={text}
-      />
-      <div className="send">
-        {/* <img src={Attach} alt="" /> */}
-        <input
-          type="file"
-          style={{ display: "none" }}
-          id="file"
-          onChange={(e) => setImg(e.target.files[0])}
+    <>
+      <div className="input">
+        <MoodIcon
+          sx={{ fill: "black", opacity: 0.5, fontSize: 35, marginRight: "8px" }}
         />
-        <label htmlFor="file">
-          <img style={{ width: "40px", height: "auto" }} src={Img} alt="" />
-        </label>
-        <button style={{ borderRadius: "5px" }} onClick={handleSend}>
-          {loading ? "Wait.." : "Send"}
-        </button>
+
+        <input
+          type="text"
+          placeholder="Type something..."
+          onChange={(e) => setText(e.target.value)}
+          value={text}
+        />
+        <div className="send">
+          {/* <img src={Attach} alt="" /> */}
+          <input
+            type="file"
+            style={{ display: "none" }}
+            id="file"
+            onChange={(e) => setImg(e.target.files[0])}
+          />
+          <label htmlFor="file">
+            <img style={{ width: "40px", height: "auto" }} src={Img} alt="" />
+          </label>
+          <button
+            style={{
+              borderRadius: "5px",
+              fontSize: "16px",
+              fontFamily: "Poppins",
+            }}
+            onClick={handleSend}
+          >
+            {loading ? "Wait.." : "Send"}
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

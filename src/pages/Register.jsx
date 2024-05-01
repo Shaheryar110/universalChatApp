@@ -5,11 +5,22 @@ import { auth, db, storage } from "../firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import {
   checkDisplayEmailExist,
   checkDisplayNameExist,
 } from "../Services/Users";
 import toast from "react-hot-toast";
+import {
+  Box,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
+} from "@mui/material";
+import logo from "../img/logo.png";
 
 function validateEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -138,16 +149,27 @@ const Register = () => {
         return;
       }
     } else {
-      toast.error("Enter Display Name ");
+      toast.error("This Name is Already Taken try Different ");
       return;
     }
   };
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   return (
     <div className="formContainer">
       <div className="formWrapper">
-        <span className="logo">Chat Fusion</span>
-        <span className="title">Register</span>
+        <img style={{ width: "100px", height: "auto" }} src={logo} />
+        {/* <span className="logo" style={{ fontFamily: "Poppins" }}>
+          Chat Fusion
+        </span> */}
+        <span
+          className="title"
+          style={{ fontFamily: "Poppins", fontSize: "18px" }}
+        >
+          Register
+        </span>
         <form onSubmit={handleSubmit}>
           <input
             required
@@ -157,6 +179,7 @@ const Register = () => {
               handleChange("displayName", e.target.value);
             }}
             value={formData.displayName}
+            style={{ width: "83%", fontFamily: "Poppins" }}
           />
           <input
             required
@@ -166,16 +189,33 @@ const Register = () => {
               handleChange("email", e.target.value);
             }}
             value={formData.email}
+            style={{ width: "83%", fontFamily: "Poppins" }}
           />
-          <input
-            required
-            type="password"
-            placeholder="password"
-            onChange={(e) => {
-              handleChange("password", e.target.value);
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontFamily: "Poppins",
             }}
-            value={formData.password}
-          />
+          >
+            <input
+              required
+              type={showPassword ? "text" : "password"}
+              placeholder="password"
+              onChange={(e) => {
+                handleChange("password", e.target.value);
+              }}
+              value={formData.password}
+              style={{ fontFamily: "Poppins" }}
+            />
+            <Box onClick={handleClickShowPassword}>
+              {showPassword ? <VisibilityOff /> : <Visibility />}
+            </Box>
+          </div>
+
           <input
             required
             style={{ display: "none" }}
@@ -185,7 +225,7 @@ const Register = () => {
           />
           <label htmlFor="file">
             <img src={Add} alt="" />
-            <span>Add an avatar</span>
+            <span style={{ fontFamily: "Poppins" }}>Add an avatar</span>
           </label>
           <button disabled={loading}>Sign up</button>
           {loading && (
@@ -201,16 +241,26 @@ const Register = () => {
             </span>
           )}
           {err && (
-            <span style={{ color: "red", textAlign: "center" }}>
+            <span
+              style={{
+                color: "red",
+                textAlign: "center",
+                fontFamily: "Poppins",
+              }}
+            >
               Something went wrong
             </span>
           )}
         </form>
-        <p>
+        <p style={{ fontFamily: "Poppins" }}>
           You do have an account?{" "}
           <Link
             to="/login"
-            style={{ textDecoration: "none", color: "inherit" }}
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+              fontFamily: "Poppins",
+            }}
           >
             Login
           </Link>

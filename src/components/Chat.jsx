@@ -17,11 +17,27 @@ const Chat = () => {
       {data.user?.displayName && (
         <div className="chat">
           <div className="chatInfo">
-            <span style={{ color: "white", fontSize: "20px" }}>
-              {data.user?.displayName}
-            </span>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <img
+                src={data?.user?.photoURL}
+                alt=""
+                style={{ width: "25px", height: "25px", borderRadius: "100%" }}
+              />
+              <span style={{ color: "white", fontSize: "20px" }}>
+                {data.user?.displayName}
+              </span>
+            </div>
+
             {data.user?.displayName && (
-              <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+              <FormControl
+                variant="standard"
+                sx={{
+                  m: 1,
+                  minWidth: 120,
+                  padding: "10px",
+                  borderRadius: "20px",
+                }}
+              >
                 <Select
                   labelId="demo-simple-select-standard-label"
                   id="demo-simple-select-standard"

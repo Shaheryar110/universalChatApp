@@ -85,9 +85,14 @@ const Search = () => {
           onKeyDown={handleKey}
           onChange={(e) => setUsername(e.target.value)}
           value={username}
+          style={{ color: "white", fontFamily: "Poppins", fontSize: 18 }}
         />
       </div>
-      {err && <span>User not found!</span>}
+      {err && (
+        <span style={{ color: "white", fontFamily: "Poppins", fontSize: 18 }}>
+          User not found!
+        </span>
+      )}
       {user && (
         <div className="userChat" onClick={handleSelect}>
           <img src={user.photoURL} alt="" />
