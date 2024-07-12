@@ -6,11 +6,11 @@ export const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState({});
+  const [baseLanguage, setBaseLanguage] = useState("en");
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
-      console.log(user);
     });
 
     return () => {
@@ -19,7 +19,9 @@ export const AuthContextProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ currentUser }}>
+    <AuthContext.Provider
+      value={{ currentUser, baseLanguage, setBaseLanguage, setCurrentUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

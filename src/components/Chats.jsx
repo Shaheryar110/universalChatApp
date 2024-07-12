@@ -27,9 +27,7 @@ const Chats = () => {
   const handleSelect = (u) => {
     dispatch({ type: "CHANGE_USER", payload: u });
   };
-  useEffect(() => {
-    console.log(chats, "cahts");
-  }, [chats]);
+
   return (
     <div className="chats">
       {Object.entries(chats)

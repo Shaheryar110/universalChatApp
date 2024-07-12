@@ -13,7 +13,36 @@ const Message = ({ message }) => {
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior: "smooth" });
   }, [message]);
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(
+      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
+    );
+    const today = new Date();
 
+    // Check if the date is today
+    if (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    ) {
+      const timeOptions = {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true, // 12-hour format with AM/PM
+      };
+      return date.toLocaleTimeString(undefined, timeOptions);
+      // If date is today, return formatted date
+    } else {
+      // If not today, return formatted time
+      const dateOptions = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      return date.toLocaleDateString(undefined, dateOptions);
+    }
+  };
   return (
     <div
       ref={ref}
@@ -28,7 +57,7 @@ const Message = ({ message }) => {
           }
           alt=""
         />
-        <span>just now</span>
+        <span>{formatTimestamp(message?.date)}</span>
       </div>
       <div className="messageContent">
         {!message.img && <p>{message.content}</p>}

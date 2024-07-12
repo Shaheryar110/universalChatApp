@@ -1,10 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "./Navbar";
 import Search from "./Search";
 import Chats from "./Chats";
 import { Box, Button } from "@mui/material";
+import FeedFormModal from "./FeedFormModal";
+import ViewFeedBack from "./ViewFeedBack";
 
 const Sidebar = () => {
+  const [feed, setFeed] = useState(false);
+  const [view, setView] = useState(false);
+  const giveFeedback = () => {
+    setFeed(!feed);
+  };
+  const viewFeedback = () => {
+    setView(!view);
+  };
   return (
     <div className="sidebar">
       <Navbar />
@@ -34,6 +44,7 @@ const Sidebar = () => {
             },
           }}
           variant="contained"
+          onClick={giveFeedback}
         >
           GIVE FEEDBACK
         </Button>
@@ -49,10 +60,13 @@ const Sidebar = () => {
             },
           }}
           variant="contained"
+          onClick={viewFeedback}
         >
           VIEW FEEDBACK
         </Button>
       </Box>
+      <FeedFormModal open={feed} handleClose={giveFeedback} />
+      <ViewFeedBack open={view} handleClose={viewFeedback} />
     </div>
   );
 };

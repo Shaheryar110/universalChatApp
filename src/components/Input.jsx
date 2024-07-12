@@ -16,14 +16,21 @@ import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import toast from "react-hot-toast";
 import axios from "axios";
 import MoodIcon from "@mui/icons-material/Mood";
+import EmojiPicker from "emoji-picker-react";
+import { Box } from "@mui/material";
 
 const Input = ({ cc }) => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [emojiBar, setEmojiBar] = useState(false);
 
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, baseLanguage } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
+
+  const showEmoji = () => {
+    setEmojiBar(!emojiBar);
+  };
 
   const handleSend = async () => {
     if (text.length > 0) {
@@ -33,7 +40,7 @@ const Input = ({ cc }) => {
         params: {
           text: text,
           to: cc,
-          from: "en",
+          from: baseLanguage || "en",
         },
         headers: {
           "X-RapidAPI-Key":
@@ -42,80 +49,68 @@ const Input = ({ cc }) => {
         },
       };
       setLoading(true);
-      // const response = await fetch("https://tx-cc.com:3001/api/translate", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     // Add other headers if required
-      //   },
-      //   body: JSON.stringify({
-      //     lng: cc,
-      //     text: text,
-      //   }),
-      // });
+
       const response = await axios.request(options);
+      console.log(response, "response");
 
       let content = response.data.translated_text[cc];
-      // console.log(response.data.translated_text[cc], "content outside", cc);
-      // console.log(await response.json(), "response");
-      if (content) {
-        console.log(content, "content");
-        if (img) {
-          const storageRef = ref(storage, uuid());
 
-          const uploadTask = uploadBytesResumable(storageRef, img);
+      // if (content) {
+      if (img) {
+        const storageRef = ref(storage, uuid());
 
-          uploadTask.on(
-            (error) => {
-              //TODO:Handle Error
-            },
-            () => {
-              getDownloadURL(uploadTask.snapshot.ref).then(
-                async (downloadURL) => {
-                  await updateDoc(doc(db, "chats", data.chatId), {
-                    messages: arrayUnion({
-                      id: uuid(),
-                      content,
-                      senderId: currentUser.uid,
-                      date: Timestamp.now(),
-                      img: downloadURL,
-                    }),
-                  });
-                }
-              );
-            }
-          );
-        } else {
-          await updateDoc(doc(db, "chats", data.chatId), {
-            messages: arrayUnion({
-              id: uuid(),
-              content,
-              senderId: currentUser.uid,
-              date: Timestamp.now(),
-            }),
-          });
-        }
+        const uploadTask = uploadBytesResumable(storageRef, img);
 
-        await updateDoc(doc(db, "userChats", currentUser.uid), {
-          [data.chatId + ".lastMessage"]: {
-            content,
-          },
-          [data.chatId + ".date"]: serverTimestamp(),
+        uploadTask.on(
+          (error) => {},
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref).then(
+              async (downloadURL) => {
+                await updateDoc(doc(db, "chats", data.chatId), {
+                  messages: arrayUnion({
+                    id: uuid(),
+                    content,
+                    senderId: currentUser.uid,
+                    date: Timestamp.now(),
+                    img: downloadURL,
+                  }),
+                });
+              }
+            );
+          }
+        );
+      } else {
+        await updateDoc(doc(db, "chats", data.chatId), {
+          messages: arrayUnion({
+            id: uuid(),
+            content: content || text,
+            senderId: currentUser.uid,
+            date: Timestamp.now(),
+          }),
         });
-
-        await updateDoc(doc(db, "userChats", data.user.uid), {
-          [data.chatId + ".lastMessage"]: {
-            content,
-          },
-          [data.chatId + ".date"]: serverTimestamp(),
-        });
-
-        setText("");
-        setImg(null);
-        setLoading(false);
-        toast.success("Message Sent Successfully");
       }
+
+      await updateDoc(doc(db, "userChats", currentUser.uid), {
+        [data.chatId + ".lastMessage"]: {
+          content: content || text,
+        },
+        [data.chatId + ".date"]: serverTimestamp(),
+      });
+
+      await updateDoc(doc(db, "userChats", data.user.uid), {
+        [data.chatId + ".lastMessage"]: {
+          content: content || text,
+        },
+        [data.chatId + ".date"]: serverTimestamp(),
+      });
+
+      setText("");
+      setImg(null);
+      setLoading(false);
+      toast.success("Message Sent Successfully");
+      // }
     }
+
     if (!text.length > 0 && img) {
       setLoading(true);
       const storageRef = ref(storage, uuid());
@@ -128,6 +123,7 @@ const Input = ({ cc }) => {
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+            console.log(downloadURL, "downloadURL");
             await updateDoc(doc(db, "chats", data.chatId), {
               messages: arrayUnion({
                 id: uuid(),
@@ -146,9 +142,19 @@ const Input = ({ cc }) => {
   };
   return (
     <>
+      {emojiBar && (
+        <Box sx={{ position: "fixed", bottom: 100 }}>
+          <EmojiPicker
+            onEmojiClick={(event, emojiObject) => {
+              setText(...text, event.emoji);
+            }}
+          />
+        </Box>
+      )}
       <div className="input">
         <MoodIcon
           sx={{ fill: "black", opacity: 0.5, fontSize: 35, marginRight: "8px" }}
+          onClick={showEmoji}
         />
 
         <input

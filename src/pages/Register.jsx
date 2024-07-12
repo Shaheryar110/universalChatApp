@@ -116,6 +116,7 @@ const Register = () => {
                       displayName,
                       email,
                       photoURL: downloadURL,
+                      baseLanguage: "en",
                     });
 
                     //create empty user chats on firestore
