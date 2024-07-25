@@ -37,8 +37,10 @@ const Sidebar = () => {
             fontFamily: "Poppins",
             color: "white",
 
-            background: "#276051",
+            background: "rgba(39, 96, 81, 0.7)",
+            paddingX: "30px",
             transition: "all ease-out 0.5s",
+            borderRadius: "1rem",
             ":hover": {
               background: "#498072",
             },
@@ -53,8 +55,11 @@ const Sidebar = () => {
             fontFamily: "Poppins",
             color: "white",
 
-            background: "#276051",
+            background: "rgba(39, 96, 81, 0.7)",
+            paddingX: "30px",
             transition: "all ease-out 0.5s",
+            borderRadius: "1rem",
+            backdropFilter: "blur(4px)",
             ":hover": {
               background: "#498072",
             },

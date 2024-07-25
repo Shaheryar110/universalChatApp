@@ -20,14 +20,16 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 400,
-  bgcolor: "background.paper",
+  bgcolor: "rgba(255,255,255,0.4)",
   border: "2px solid #000",
   boxShadow: 24,
+  backdropFilter: "blur(4px)",
   p: 6,
+  color: "white",
+  borderRadius: "1rem",
 };
 
 const FeedFormModal = ({ open, handleClose }) => {
-  const { currentUser } = useContext(AuthContext);
   const [formValues, setFormValues] = useState({
     email: "",
     message: "",
@@ -56,7 +58,9 @@ const FeedFormModal = ({ open, handleClose }) => {
         date: Date.now(),
         formValues,
       };
+      console.log(temp, "temp");
       let done = await sendFeedback(temp);
+
       if (done) {
         toast.success("Feedback Submitted");
         setFormValues({
@@ -107,16 +111,27 @@ const FeedFormModal = ({ open, handleClose }) => {
             marginTop: "10px",
           }}
         >
-          <TextField
-            id="outlined-basic"
-            label="Email"
+          <Typography
+            sx={{ width: "100%", marginBottom: "-10px", fontFamily: "Poppins" }}
+          >
+            Email
+          </Typography>
+          <input
             name="email"
+            placeholder="Email"
             value={formValues.email}
             onChange={handleChange}
-            variant="outlined"
-            sx={{ width: "100%" }}
+            style={{
+              background: "transparent",
+              border: "1px solid white",
+              borderRadius: "15px",
+              color: "white",
+              width: "90%",
+              fontFamily: "Poppins",
+              padding: "1rem",
+            }}
           />
-          <TextField
+          {/* <TextField
             id="outlined-basic"
             label="Message"
             variant="outlined"
@@ -126,6 +141,27 @@ const FeedFormModal = ({ open, handleClose }) => {
             onChange={handleChange}
             multiline
             sx={{ width: "100%" }}
+          /> */}
+          <Typography
+            sx={{ width: "100%", marginBottom: "-10px", fontFamily: "Poppins" }}
+          >
+            Message
+          </Typography>
+          <textarea
+            value={formValues.message}
+            onChange={handleChange}
+            name="message"
+            placeholder="Message"
+            style={{
+              background: "transparent",
+              border: "1px solid white",
+              borderRadius: "15px",
+              color: "white",
+              width: "90%",
+              height: "300px",
+              padding: "1rem",
+              fontFamily: "Poppins",
+            }}
           />
           <Box
             sx={{
@@ -149,6 +185,8 @@ const FeedFormModal = ({ open, handleClose }) => {
 
               background: "#276051",
               transition: "all ease-out 0.5s",
+              paddingX: "50px",
+              borderRadius: "20px",
               ":hover": {
                 background: "#498072",
               },

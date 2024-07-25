@@ -8,7 +8,7 @@ const Chats = () => {
   const [chats, setChats] = useState([]);
 
   const { currentUser } = useContext(AuthContext);
-  const { dispatch } = useContext(ChatContext);
+  const { dispatch, data } = useContext(ChatContext);
 
   useEffect(() => {
     const getChats = () => {
@@ -29,7 +29,16 @@ const Chats = () => {
   };
 
   return (
-    <div className="chats">
+    <div
+      className="chats"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        position: "relative",
+        zIndex: -1,
+      }}
+    >
       {Object.entries(chats)
         ?.sort((a, b) => b[1].date - a[1].date)
         .map((chat) => (
@@ -37,6 +46,11 @@ const Chats = () => {
             className="userChat"
             key={chat[0]}
             onClick={() => handleSelect(chat[1].userInfo)}
+            style={{
+              background:
+                data?.user?.displayName === chat[1].userInfo.displayName &&
+                "#276051  ",
+            }}
           >
             <img src={chat[1].userInfo.photoURL} alt="" />
             <div className="userChatInfo">

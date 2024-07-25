@@ -78,15 +78,17 @@ const Search = () => {
   };
   return (
     <div className="search">
-      <div className="searchForm">
+      <div className="input-group">
         <input
+          className="form-control"
           type="text"
           placeholder="Find  user by user name"
           onKeyDown={handleKey}
           onChange={(e) => setUsername(e.target.value)}
           value={username}
-          style={{ color: "white", fontFamily: "Poppins", fontSize: 18 }}
         />
+        <label>Find user by user name</label>
+        <div className="req-mark">!</div>
       </div>
       {err && (
         <span style={{ color: "white", fontFamily: "Poppins", fontSize: 18 }}>
@@ -94,7 +96,7 @@ const Search = () => {
         </span>
       )}
       {user && (
-        <div className="userChat" onClick={handleSelect}>
+        <div className="userChatResponse" onClick={handleSelect}>
           <img src={user.photoURL} alt="" />
           <div className="userChatInfo">
             <span>{user.displayName}</span>

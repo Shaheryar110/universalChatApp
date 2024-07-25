@@ -137,6 +137,7 @@ const Navbar = () => {
                 transition: "opacity 0.3s ease, transform 0.3s ease",
                 opacity: 1,
                 transform: "translateY(0)",
+                zIndex: 99,
               }}
             >
               <Typography
