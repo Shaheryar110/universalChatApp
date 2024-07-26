@@ -111,3 +111,12 @@ export const allFeedBacks = async () => {
   });
   return temp;
 };
+
+export const getAllUsers = async () => {
+  let temp = [];
+  const querySnapshot = await getDocs(collection(db, "users"));
+  querySnapshot.forEach((doc) => {
+    temp.push({ ...doc.data(), id: doc.id });
+  });
+  return temp;
+};

@@ -25,8 +25,14 @@ import LoginIcon from "@mui/icons-material/Login";
 import AddIcon from "@mui/icons-material/Add";
 import logo from "../img/logo.png";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import { getUserById, updatelanguage, updateUser } from "../Services/Users";
+import {
+  getAllUsers,
+  getUserById,
+  updatelanguage,
+  updateUser,
+} from "../Services/Users";
 import LanguageIcon from "@mui/icons-material/Language";
+import CreateGroupModal from "./CreateGroupModal";
 const style = {
   position: "absolute",
   top: "50%",
@@ -43,10 +49,12 @@ const Navbar = () => {
   const { currentUser, setBaseLanguage, setCurrentUser } =
     useContext(AuthContext);
   const [user, setUser] = useState();
-
+  const [groupModal, setGroupModal] = useState(false);
   const [open, setOpen] = useState(false);
   const [openProfile, setOpenProfile] = useState(false);
   const [lang, setLang] = useState(false);
+
+  const [allUsers, setAllUsers] = useState();
 
   const toggle = () => {
     setOpen(!open);
@@ -95,10 +103,21 @@ const Navbar = () => {
     setBaseLanguage(data?.baseLanguage);
     setUser(data);
   };
+  const handleCreateGroupModal = () => {
+    setGroupModal(!groupModal);
+  };
+
+  const getUsers = async () => {
+    let users = await getAllUsers();
+    if (users) {
+      setAllUsers(users);
+    }
+  };
 
   useEffect(() => {
     if (currentUser) {
       getData();
+      getUsers();
     }
   }, [currentUser]);
 
@@ -186,7 +205,8 @@ const Navbar = () => {
               >
                 <LanguageIcon style={{ fill: "black" }} /> Change Language
               </Typography>
-              {/* <Typography
+
+              <Typography
                 sx={{
                   fontSize: 18,
                   fontFamily: "Poppins",
@@ -205,31 +225,10 @@ const Navbar = () => {
                     fontWeight: 600,
                   },
                 }}
-              >
-                <AutoFixHighIcon style={{ fill: "black" }} /> Update Profile
-              </Typography> */}
-              {/* <Typography
-                sx={{
-                  fontSize: 18,
-                  fontFamily: "Poppins",
-                  paddingY: "7px",
-                  color: "black",
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: "10px",
-                  cursor: "pointer",
-                  borderRadius: "5px",
-                  paddingX: "10px",
-                  transition: "all ease-out 0.3s",
-                  ":hover": {
-                    background: "#E3E1D9",
-                    fontWeight: 600,
-                  },
-                }}
+                onClick={handleCreateGroupModal}
               >
                 <AddIcon style={{ fill: "black" }} /> Create Group
-              </Typography> */}
+              </Typography>
               <Typography
                 sx={{
                   fontSize: 18,
@@ -360,6 +359,11 @@ const Navbar = () => {
             </FormControl>
           </Box>
         </Dialog>
+        <CreateGroupModal
+          open={groupModal}
+          close={handleCreateGroupModal}
+          allUsers={allUsers}
+        />
       </div>
     </div>
   );

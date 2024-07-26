@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   collection,
   query,
@@ -12,13 +12,16 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
+import logo from "../img/logo.png";
+import { ChatContext } from "../context/ChatContext";
 const Search = () => {
   const [username, setUsername] = useState("");
   const [user, setUser] = useState(null);
   const [err, setErr] = useState(false);
+  const [groups, setGroups] = useState([]);
 
   const { currentUser } = useContext(AuthContext);
-
+  const { dispatch } = useContext(ChatContext);
   const handleSearch = async () => {
     const q = query(
       collection(db, "users"),
@@ -49,10 +52,8 @@ const Search = () => {
       const res = await getDoc(doc(db, "chats", combinedId));
 
       if (!res.exists()) {
-        //create a chat in chats collection
         await setDoc(doc(db, "chats", combinedId), { messages: [] });
 
-        //create user chats
         await updateDoc(doc(db, "userChats", currentUser.uid), {
           [combinedId + ".userInfo"]: {
             uid: user.uid,
@@ -76,6 +77,38 @@ const Search = () => {
     setUser(null);
     setUsername("");
   };
+  const handleSelectGroup = (group) => {
+    dispatch({
+      type: "CHANGE_GROUP",
+      payload: {
+        groupId: group.id,
+        groupName: group.groupName,
+      },
+    });
+  };
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const userDoc = await getDoc(doc(db, "userGroups", currentUser.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          const fetchedGroups = [];
+          Object.keys(data).forEach((key) => {
+            if (data[key].groupInfo) {
+              fetchedGroups.push(data[key].groupInfo);
+            }
+          });
+          setGroups(fetchedGroups);
+        }
+      } catch (err) {
+        setErr(true);
+        console.error("Error fetching groups: ", err);
+      }
+    };
+
+    fetchGroups();
+  }, [currentUser.uid]);
+
   return (
     <div className="search">
       <div className="input-group">
@@ -95,6 +128,22 @@ const Search = () => {
           User not found!
         </span>
       )}
+      {groups &&
+        groups?.length > 0 &&
+        groups?.map((group, index) => (
+          <div
+            key={index}
+            className="userChatResponse"
+            onClick={() => {
+              handleSelectGroup(group);
+            }}
+          >
+            <img src={logo} alt="" />
+            <div className="userChatInfo">
+              <span>{group?.groupName}</span>
+            </div>
+          </div>
+        ))}
       {user && (
         <div className="userChatResponse" onClick={handleSelect}>
           <img src={user.photoURL} alt="" />

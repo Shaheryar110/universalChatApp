@@ -6,6 +6,7 @@ import { ChatContext } from "../context/ChatContext";
 import {
   arrayUnion,
   doc,
+  getDoc,
   serverTimestamp,
   Timestamp,
   updateDoc,
@@ -51,64 +52,83 @@ const Input = ({ cc }) => {
       setLoading(true);
 
       const response = await axios.request(options);
-      console.log(response, "response");
-
       let content = response.data.translated_text[cc];
 
-      // if (content) {
+      // Determine the collection based on the type of chat (individual or group)
+      const chatDocRef = doc(db, "chats", data.chatId);
+      const chatDoc = await getDoc(chatDocRef);
+
       if (img) {
         const storageRef = ref(storage, uuid());
 
         const uploadTask = uploadBytesResumable(storageRef, img);
 
         uploadTask.on(
-          (error) => {},
-          () => {
-            getDownloadURL(uploadTask.snapshot.ref).then(
-              async (downloadURL) => {
-                await updateDoc(doc(db, "chats", data.chatId), {
-                  messages: arrayUnion({
-                    id: uuid(),
-                    content,
-                    senderId: currentUser.uid,
-                    date: Timestamp.now(),
-                    img: downloadURL,
-                  }),
-                });
-              }
-            );
+          (error) => {
+            // Handle error
+          },
+          async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            const messageData = {
+              id: uuid(),
+              content,
+              senderId: currentUser.uid,
+              date: Timestamp.now(),
+              img: downloadURL,
+            };
+
+            if (chatDoc.exists()) {
+              await updateDoc(chatDocRef, {
+                messages: arrayUnion(messageData),
+              });
+            } else {
+              const groupDocRef = doc(db, "groups", data.chatId);
+              await updateDoc(groupDocRef, {
+                messages: arrayUnion(messageData),
+              });
+            }
           }
         );
       } else {
-        await updateDoc(doc(db, "chats", data.chatId), {
-          messages: arrayUnion({
-            id: uuid(),
-            content: content || text,
-            senderId: currentUser.uid,
-            date: Timestamp.now(),
-          }),
-        });
+        const messageData = {
+          id: uuid(),
+          content: content || text,
+          senderId: currentUser.uid,
+          date: Timestamp.now(),
+        };
+
+        if (chatDoc.exists()) {
+          await updateDoc(chatDocRef, {
+            messages: arrayUnion(messageData),
+          });
+        } else {
+          const groupDocRef = doc(db, "groups", data.chatId);
+          await updateDoc(groupDocRef, {
+            messages: arrayUnion(messageData),
+          });
+        }
       }
 
-      await updateDoc(doc(db, "userChats", currentUser.uid), {
-        [data.chatId + ".lastMessage"]: {
-          content: content || text,
-        },
-        [data.chatId + ".date"]: serverTimestamp(),
-      });
+      if (chatDoc.exists()) {
+        // Only update userChats for individual chats
+        await updateDoc(doc(db, "userChats", currentUser.uid), {
+          [data.chatId + ".lastMessage"]: {
+            content: content || text,
+          },
+          [data.chatId + ".date"]: serverTimestamp(),
+        });
 
-      await updateDoc(doc(db, "userChats", data.user.uid), {
-        [data.chatId + ".lastMessage"]: {
-          content: content || text,
-        },
-        [data.chatId + ".date"]: serverTimestamp(),
-      });
-
+        await updateDoc(doc(db, "userChats", data.user.uid), {
+          [data.chatId + ".lastMessage"]: {
+            content: content || text,
+          },
+          [data.chatId + ".date"]: serverTimestamp(),
+        });
+      }
       setText("");
       setImg(null);
       setLoading(false);
       toast.success("Message Sent Successfully");
-      // }
     }
 
     if (!text.length > 0 && img) {
@@ -119,25 +139,36 @@ const Input = ({ cc }) => {
 
       uploadTask.on(
         (error) => {
-          //TODO:Handle Error
+          // Handle error
         },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-            console.log(downloadURL, "downloadURL");
-            await updateDoc(doc(db, "chats", data.chatId), {
-              messages: arrayUnion({
-                id: uuid(),
-                content: "",
-                senderId: currentUser.uid,
-                date: Timestamp.now(),
-                img: downloadURL,
-              }),
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          const messageData = {
+            id: uuid(),
+            content: "",
+            senderId: currentUser.uid,
+            date: Timestamp.now(),
+            img: downloadURL,
+          };
+
+          const chatDocRef = doc(db, "chats", data.chatId);
+          const chatDoc = await getDoc(chatDocRef);
+
+          if (chatDoc.exists()) {
+            await updateDoc(chatDocRef, {
+              messages: arrayUnion(messageData),
             });
-          });
+          } else {
+            const groupDocRef = doc(db, "groups", data.chatId);
+            await updateDoc(groupDocRef, {
+              messages: arrayUnion(messageData),
+            });
+          }
+
+          setLoading(false);
+          toast.success("Message Sent Successfully");
         }
       );
-      setLoading(false);
-      toast.success("Message Sent Successfully");
     }
   };
 
@@ -178,7 +209,6 @@ const Input = ({ cc }) => {
           value={text}
         />
         <div className="send">
-          {/* <img src={Attach} alt="" /> */}
           <input
             type="file"
             style={{ display: "none" }}

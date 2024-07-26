@@ -45,17 +45,17 @@ const Chats = () => {
           <div
             className="userChat"
             key={chat[0]}
-            onClick={() => handleSelect(chat[1].userInfo)}
+            onClick={() => handleSelect(chat[1]?.userInfo)}
             style={{
               background:
-                data?.user?.displayName === chat[1].userInfo.displayName &&
+                data?.user?.displayName === chat[1]?.userInfo?.displayName &&
                 "#276051  ",
             }}
           >
-            <img src={chat[1].userInfo.photoURL} alt="" />
+            <img src={chat[1]?.userInfo?.photoURL} alt="" />
             <div className="userChatInfo">
-              <span>{chat[1].userInfo.displayName}</span>
-              <p>{chat[1].lastMessage?.content}</p>
+              <span>{chat[1]?.userInfo?.displayName}</span>
+              <p>{chat[1]?.lastMessage?.content}</p>
             </div>
           </div>
         ))}
